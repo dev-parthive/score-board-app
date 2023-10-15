@@ -1,9 +1,7 @@
 // dom element selection 
 const addAnotherMatchBtn   = document.querySelector(".lws-addMatch")
-
 const matchContainer = document.querySelector('.all-matches')
 
-const deleteMatchBtn  = document.querySelector('.lws-delete')
 
 //initial state 
 const initialState = [
@@ -23,6 +21,9 @@ const idGenerator = (arr) =>{
 //action identyfier 
 const ADDANOTHERMATCH = "addAnotherMatch"
 const DELETEMATCH = 'matchDelete'
+const INCREMENT = "increment"
+const DECREMENT = "decrement"
+
 
 // action creator 
 const addMatch = () =>{
@@ -32,10 +33,23 @@ const addMatch = () =>{
 };
 
 const deleteMatch = (payloads) =>{
-    console.log(payloads)
     return {
         type: DELETEMATCH, 
         payloads
+    }
+};
+
+const increment = (payload) =>{
+    return {
+        type: INCREMENT,
+        payload
+    }
+}
+
+const decrement = (payload) =>{
+    return {
+        type: DECREMENT, 
+        payload
     }
 }
 
@@ -53,9 +67,38 @@ const scoreReducer = (state = initialState, action ) =>{
             ];
 
         case DELETEMATCH : 
-            const undeletedmatches = state.filter(item => item.id != action.payloads)
+            const undeletedmatches = state.filter(item =>{
+                 const result = item.id != action.payloads;
+                 console.log("result : ", result)
+                return result
+                })
             console.log(undeletedmatches)
             return undeletedmatches;
+        
+        case INCREMENT : 
+                let incrementState = state.map(item => {
+                    if(item.id === action.payload.id){
+                        return{
+                            ...item, score: item.score + Number(action.payload.value)
+                        }
+                    }else{
+                        return item
+                    }
+                })
+                return incrementState;
+        case DECREMENT : 
+                let decrementState = state.map(item => {
+                    if(item.id === action.payload.id){
+                        return {
+                            ...item, score : item.score - Number(action.payload.value)
+
+                        }
+
+                    }else{
+                        return item
+                    }
+                })
+                return decrementState;
 
 
         default: 
@@ -71,12 +114,29 @@ const store  = Redux.createStore(scoreReducer)
 // Button click event Listeners 
 addAnotherMatchBtn.addEventListener("click", ()=>{
     console.log("btn is clicked ")
-    store.dispatch({type: ADDANOTHERMATCH})
-})
+    store.dispatch(addMatch())
+});
+
 
 const deleteMatchBtnHandler = (id) =>{
     console.log("delte buttons has clicked ")
     store.dispatch(deleteMatch(id))
+};
+
+//incrementHandler  
+const incrementHandler = (id, formElm) =>{
+    const value = Number(formElm.querySelector('.lws-increment').value)
+    console.log("increment field value is : ",value)
+    store.dispatch(increment({id, value}))
+    formElm.querySelector('.lws-increment').innerHTML = ""
+};
+
+// decrementHanlder  
+const decrementHandler = (id, formElm) =>{
+    const value = Number(formElm.querySelector(".lws-decrement").value)
+    console.log("decrement field value is : ", value)
+    store.dispatch(decrement({id, value}))
+    formElm.querySelector(".lws-decrement").innerHTML = ""
 }
 
 // Render function 
@@ -91,7 +151,7 @@ const matchHTML  = (match) =>{
                         <h3 class="lws-matchName">Match ${match.id}</h3>
                     </div>
                     <div class="inc-dec">
-                        <form class="incrementForm">
+                        <form class="incrementForm" onsubmit="event.preventDefault() ; incrementHandler(${match.id}, this)">
                             <h4>Increment</h4>
                             <input
                                 type="number"
@@ -99,7 +159,7 @@ const matchHTML  = (match) =>{
                                 class="lws-increment"
                             />
                         </form>
-                        <form class="decrementForm">
+                        <form class="decrementForm" onsubmit="event.preventDefault() ; decrementHandler(${match.id}, this)">
                             <h4>Decrement</h4>
                             <input
                                 type="number"
