@@ -1,69 +1,91 @@
 // dom element selection 
-const addMatchBtn = document.querySelector(".lws-addMatch")
-const allMatchContainer = document.querySelector('.all-matches')
+const addAnotherMatchBtn   = document.querySelector(".lws-addMatch")
 
+const matchContainer = document.querySelector('.all-matches')
 
+const deleteMatchBtn  = document.querySelector('.lws-delete')
 
-
-// inital state 
+//initial state 
 const initialState = [
     {
         id: 1, 
         score: 0
     }
 ]
- // idGenerator for addAnotherMatch  
- const idGenerator = (arr) =>{
-    const maxId = arr.reduce((maxId, match) => Math.max(maxId, match.id), -1)
-    return maxId + 1; 
- }
-//  action identyfier 
+
+//idGenerator for addMatch 
+const idGenerator = (arr) =>{
+    const maxId = arr.reduce((maxId, match) => Math.max(maxId, match.id), -1) 
+    return maxId + 1 ; 
+    
+}
+
+//action identyfier 
 const ADDANOTHERMATCH = "addAnotherMatch"
+const DELETEMATCH = 'matchDelete'
 
 // action creator 
-
 const addMatch = () =>{
     return {
-        type: ADDANOTHERMATCH
+        type : ADDANOTHERMATCH
     }
-} 
+};
 
-// reducer function 
-const scoreReducer = (state = initialState, action) =>{
+const deleteMatch = (payloads) =>{
+    console.log(payloads)
+    return {
+        type: DELETEMATCH, 
+        payloads
+    }
+}
 
-    switch (action.type){
-        case ADDANOTHERMATCH: 
+//reducer function 
+const scoreReducer = (state = initialState, action ) =>{
+    switch(action.type){
+        case ADDANOTHERMATCH : 
             let newId = idGenerator(state)
-            return[
+            return [
                 ...state, 
                 {
-                    id: newId, 
+                    id: newId , 
                     score: 0
                 }
             ];
-            default: 
-                return state;
+
+        case DELETEMATCH : 
+            const undeletedmatches = state.filter(item => item.id != action.payloads)
+            console.log(undeletedmatches)
+            return undeletedmatches;
+
+
+        default: 
+            return state;
     }
 }
 
 
-// create store 
+//create store 
 const store  = Redux.createStore(scoreReducer)
 
 
 // Button click event Listeners 
-addMatchBtn.addEventListener("click", ()=>{
-    console.log("btn is clicked ");
+addAnotherMatchBtn.addEventListener("click", ()=>{
+    console.log("btn is clicked ")
     store.dispatch({type: ADDANOTHERMATCH})
-
 })
 
-// Render Function 
-const matchHTML = (match) => {
+const deleteMatchBtnHandler = (id) =>{
+    console.log("delte buttons has clicked ")
+    store.dispatch(deleteMatch(id))
+}
+
+// Render function 
+const matchHTML  = (match) =>{
+    console.log("mach details :" , match)
     return `
     <div class="match">
                     <div class="wrapper">
-                        <button class="lws-delete">
+                        <button class="lws-delete" onClick="deleteMatchBtnHandler(${match.id})">
                             <img src="./image/delete.svg" alt="" />
                         </button>
                         <h3 class="lws-matchName">Match ${match.id}</h3>
@@ -95,9 +117,10 @@ const matchHTML = (match) => {
 
 const render = () =>{
     const state = store.getState()
-    let elm = ``
-    state.map(match => elm += matchHTML(match))
-    return allMatchContainer.innerHTML = elm
+    elm = ``
+    state.map(match => elm +=  matchHTML(match))
+    return matchContainer.innerHTML = elm
 }
+
 render()
 store.subscribe(render)
