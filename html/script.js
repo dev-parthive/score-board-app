@@ -23,7 +23,7 @@ const ADDANOTHERMATCH = "addAnotherMatch"
 const DELETEMATCH = 'matchDelete'
 const INCREMENT = "increment"
 const DECREMENT = "decrement"
-
+const RESET  = "reset"
 
 // action creator 
 const addMatch = () =>{
@@ -51,8 +51,13 @@ const decrement = (payload) =>{
         type: DECREMENT, 
         payload
     }
-}
+};
 
+const reset = () =>{
+    return {
+        type: RESET
+    }
+}
 //reducer function 
 const scoreReducer = (state = initialState, action ) =>{
     switch(action.type){
@@ -99,7 +104,13 @@ const scoreReducer = (state = initialState, action ) =>{
                     }
                 })
                 return decrementState;
-
+        case RESET : 
+                let restedState = state.map(item => {
+                    return {
+                        ...item , score: 0
+                    }
+                })
+                return restedState;
 
         default: 
             return state;
@@ -137,6 +148,12 @@ const decrementHandler = (id, formElm) =>{
     console.log("decrement field value is : ", value)
     store.dispatch(decrement({id, value}))
     formElm.querySelector(".lws-decrement").innerHTML = ""
+}; 
+
+// ResetHandler 
+const resetHandler = () =>{
+    console.log("btn is clicked");
+    store.dispatch(reset())
 }
 
 // Render function 
