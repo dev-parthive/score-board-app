@@ -94,8 +94,9 @@ const scoreReducer = (state = initialState, action ) =>{
         case DECREMENT : 
                 let decrementState = state.map(item => {
                     if(item.id === action.payload.id){
+                        const score = item.score - Number(action.payload.value)
                         return {
-                            ...item, score : item.score - Number(action.payload.value)
+                            ...item, score : score>=0 ? score : 0
 
                         }
 
